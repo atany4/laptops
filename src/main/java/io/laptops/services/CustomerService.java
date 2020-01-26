@@ -1,10 +1,10 @@
-package io.laptops.dao;
+package io.laptops.services;
 
 import io.laptops.entity.Customer;
 
 import java.util.List;
 
-public interface CustomerDao {
+public interface CustomerService {
     void create(Customer customer);
     Customer read(long id);
     void update(Customer customer);

@@ -75,6 +75,18 @@ public class CustomerDaoImpl implements CustomerDao {
     }
 
     @Override
+    public List<Customer> findById(Long id) {
+        List<Customer> list = new ArrayList<>();
+        try {
+            Query query = entityManager.createQuery("SELECT e FROM Customer e WHERE e.id LIKE :id").setParameter("id", id);
+            list = (List<Customer>) query.getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    @Override
     public void close() {
         entityManager.close();
     }

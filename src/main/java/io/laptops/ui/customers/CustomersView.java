@@ -1,5 +1,9 @@
 package io.laptops.ui.customers;
 
+import com.sun.org.apache.bcel.internal.generic.ARETURN;
+import com.vaadin.data.Binder;
+import com.vaadin.data.provider.DataProvider;
+import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.navigator.View;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.*;
@@ -8,15 +12,19 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.components.grid.HeaderRow;
 import io.laptops.dao.CustomerDao;
 import io.laptops.dao.CustomerDaoImpl;
 import io.laptops.entity.Customer;
+import io.laptops.services.CustomerService;
+import io.laptops.services.CustomerServiceImpl;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class CustomersView extends VerticalLayout implements View {
-    private CustomerDao customerDao = new CustomerDaoImpl();
+    CustomerService customerService = new CustomerServiceImpl();
     private Grid<Customer> mainGrid = new Grid<>();
 
     public CustomersView() {
@@ -39,7 +47,7 @@ public class CustomersView extends VerticalLayout implements View {
                 customer.setFullName(tfFullName.getValue());
                 customer.setEmail(tfEmail.getValue());
                 customer.setPhoneNumber(tfPhoneNumber.getValue());
-                customerDao.create(customer);
+                customerService.create(customer);
                 updateGrid();
                 window.close();
             });
@@ -47,7 +55,7 @@ public class CustomersView extends VerticalLayout implements View {
             Component buttonClose = new Button("Close");
             buttonClose.addListener(event -> window.close());
 
-            buttons.addComponents(buttonClose, buttonSave);
+            buttons.addComponents(buttonSave, buttonClose);
             formLayout.addComponents(tfFullName, tfLogin, tfEmail, tfPhoneNumber);
             formLayout.addComponents(buttons);
             formLayout.setMargin(true);
@@ -80,12 +88,12 @@ public class CustomersView extends VerticalLayout implements View {
             HorizontalLayout buttons = new HorizontalLayout();
             Component buttonSave = new Button("Save");
             buttonSave.addListener(event -> {
-                Customer customer = customerDao.read(Long.parseLong(tfId.getValue()));
+                Customer customer = customerService.read(Long.parseLong(tfId.getValue()));
                 customer.setLogin((tfLogin.getValue()));
                 customer.setFullName(tfFullName.getValue());
                 customer.setEmail(tfEmail.getValue());
                 customer.setPhoneNumber(tfPhoneNumber.getValue());
-                customerDao.update(customer);
+                customerService.update(customer);
                 updateGrid();
                 window.close();
             });
@@ -104,7 +112,7 @@ public class CustomersView extends VerticalLayout implements View {
         MenuBar.Command deleteUser = selectedItem -> {
             Optional<Customer> blameCustomer = mainGrid.getSelectionModel().getFirstSelectedItem();
             if (blameCustomer.isPresent()) {
-                customerDao.delete(blameCustomer.get());
+                customerService.delete(blameCustomer.get());
                 updateGrid();
             }
         };
@@ -116,7 +124,7 @@ public class CustomersView extends VerticalLayout implements View {
 
 //        customerDao.close();
 //        FactoryManager.close();
-
+        mainGrid.setSelectionMode(Grid.SelectionMode.SINGLE);
         mainGrid.setCaption("Cutomers");
         mainGrid.setWidth(100, Unit.PERCENTAGE);
         mainGrid.addColumn(Customer::getId).setCaption("Id");
@@ -130,7 +138,21 @@ public class CustomersView extends VerticalLayout implements View {
         setMargin(false);
         setSpacing(false);
 
-        addComponents(menuBar, mainGrid);
+        TextField filter = new TextField("Filter by ID");
+        filter.addValueChangeListener(e -> {
+            List<Customer> customers = null;
+            if (Objects.requireNonNull(filter.getValue()).isEmpty()) {
+                customers = customerService.getAll();
+
+            } else {
+                customers = customerService.findById(Long.parseLong(filter.getValue()));
+            }
+            mainGrid.setItems(customers);
+            mainGrid.getDataProvider().refreshAll();
+        });
+
+
+        addComponents(menuBar, filter, mainGrid);
         setComponentAlignment(menuBar, Alignment.MIDDLE_LEFT);
         setExpandRatio(menuBar, 0.05f);
         setExpandRatio(mainGrid, 0.8f);
@@ -171,7 +193,7 @@ public class CustomersView extends VerticalLayout implements View {
     }
 
     private void updateGrid() {
-        List<Customer> customers = customerDao.getAll();
+        List<Customer> customers = customerService.getAll();
         mainGrid.setItems(customers);
         mainGrid.getDataProvider().refreshAll();
     }
