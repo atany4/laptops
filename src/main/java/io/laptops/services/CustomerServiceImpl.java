@@ -1,13 +1,19 @@
 package io.laptops.services;
 
 import io.laptops.dao.CustomerDao;
-import io.laptops.dao.CustomerDaoImpl;
 import io.laptops.entity.Customer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-public class CustomerServiceImpl implements CustomerService{
-    CustomerDao customerDao = new CustomerDaoImpl();
+@Service
+public class CustomerServiceImpl implements CustomerService {
+    @Autowired
+    CustomerDao customerDao;
+
+    public CustomerServiceImpl() {
+    }
 
     @Override
     public void create(Customer customer) {

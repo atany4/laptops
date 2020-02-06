@@ -31,6 +31,7 @@
 		</repository>
 	</repositories>
 
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -44,6 +45,17 @@
 	</dependencyManagement>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.vaadin</groupId>
+			<artifactId>vaadin-spring</artifactId>
+			<version>3.1.0</version>
+		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.springframework</groupId>-->
+<!--			<artifactId>spring-context</artifactId>-->
+<!--			<version>5.0.7.RELEASE</version>-->
+<!--		</dependency>-->
+
 <!--		JPA Part-->
 		<dependency>
 			<groupId>mysql</groupId>

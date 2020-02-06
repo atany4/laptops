@@ -1,5 +1,6 @@
 package io.laptops.ui;
 
+import javax.servlet.annotation.WebListener;
 import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
@@ -7,19 +8,42 @@ import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.Navigator;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.server.VaadinServlet;
+import com.vaadin.spring.server.SpringVaadinServlet;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.themes.ValoTheme;
+import io.laptops.services.CustomerService;
 import io.laptops.ui.customers.CustomersView;
 import io.laptops.ui.orders.OrdersView;
 import io.laptops.ui.store.StoreView;
 import io.laptops.ui.suppliers.SuppliersView;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import com.vaadin.spring.annotation.EnableVaadin;
+import com.vaadin.spring.annotation.SpringUI;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.context.ContextLoaderListener;
 
 @Theme("mytheme")
-public class UI extends com.vaadin.ui.UI {
+@SpringUI
+@SuppressWarnings("serial")
+public class MyUI extends UI {
+    @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
+    @VaadinServletConfiguration(ui = MyUI.class, productionMode = false)
+    public static class MyUIServlet extends SpringVaadinServlet {
+    }
+
+    @WebListener
+    public static class MyContextLoaderListener extends ContextLoaderListener {
+    }
+
+    @Configuration
+    @EnableVaadin
+    public static class MyConfiguration {
+    }
+
+    @Autowired
+    public CustomerService customerService;
 
     @Override
     protected void init(VaadinRequest vaadinRequest) {
@@ -66,11 +90,5 @@ public class UI extends com.vaadin.ui.UI {
         mainLayout.addComponent(viewContainer);
         mainLayout.setExpandRatio(viewContainer, 1.0F);
         setContent(mainLayout);
-
-    }
-
-    @WebServlet(urlPatterns = "/*", name = "MyUIServlet", asyncSupported = true)
-    @VaadinServletConfiguration(ui = UI.class, productionMode = false)
-    public static class MyUIServlet extends VaadinServlet {
     }
 }

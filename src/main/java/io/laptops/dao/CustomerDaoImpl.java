@@ -2,6 +2,7 @@ package io.laptops.dao;
 
 import io.laptops.entity.Customer;
 import io.laptops.util.FactoryManager;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -9,8 +10,12 @@ import javax.persistence.Query;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class CustomerDaoImpl implements CustomerDao {
     private EntityManager entityManager = new FactoryManager().getEntityManager();
+
+    public CustomerDaoImpl() {
+    }
 
     @Override
     public void create(Customer customer) {

@@ -1,9 +1,5 @@
 package io.laptops.ui.customers;
 
-import com.sun.org.apache.bcel.internal.generic.ARETURN;
-import com.vaadin.data.Binder;
-import com.vaadin.data.provider.DataProvider;
-import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.navigator.View;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.*;
@@ -12,23 +8,22 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Window;
-import com.vaadin.ui.components.grid.HeaderRow;
-import io.laptops.dao.CustomerDao;
-import io.laptops.dao.CustomerDaoImpl;
+import com.vaadin.ui.themes.ValoTheme;
 import io.laptops.entity.Customer;
 import io.laptops.services.CustomerService;
-import io.laptops.services.CustomerServiceImpl;
+import io.laptops.ui.MyUI;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 public class CustomersView extends VerticalLayout implements View {
-    CustomerService customerService = new CustomerServiceImpl();
+
+    private CustomerService customerService = ((MyUI)MyUI.getCurrent()).customerService;
     private Grid<Customer> mainGrid = new Grid<>();
 
     public CustomersView() {
-        MenuBar.Command newUser = selectedItem -> {
+        MenuBar.Command newUser = event -> {
             final Window window = new Window("Window");
             window.setWidth(350.0f, Sizeable.Unit.PIXELS);
             window.setModal(true);
@@ -41,7 +36,7 @@ public class CustomersView extends VerticalLayout implements View {
 
             HorizontalLayout buttons = new HorizontalLayout();
             Component buttonSave = new Button("Save");
-            buttonSave.addListener(event -> {
+            buttonSave.addListener(clickEvent -> {
                 Customer customer = new Customer();
                 customer.setLogin((tfLogin.getValue()));
                 customer.setFullName(tfFullName.getValue());
@@ -53,7 +48,7 @@ public class CustomersView extends VerticalLayout implements View {
             });
 
             Component buttonClose = new Button("Close");
-            buttonClose.addListener(event -> window.close());
+            buttonClose.addListener(e -> window.close());
 
             buttons.addComponents(buttonSave, buttonClose);
             formLayout.addComponents(tfFullName, tfLogin, tfEmail, tfPhoneNumber);
@@ -117,10 +112,41 @@ public class CustomersView extends VerticalLayout implements View {
             }
         };
 
+
+        MenuBar.Command popUp = event -> {
+            final Window subWindow = new Window();
+            final Panel panel = new Panel("Dialog");
+            final VerticalLayout content = new VerticalLayout();
+            Label question = new Label("Make event ?");
+            question.setStyleName(ValoTheme.LABEL_H2);
+
+            HorizontalLayout buttons = new HorizontalLayout();
+            Button confirm = new Button("Confirm");
+            Button decline = new Button("Decline");
+
+            decline.addClickListener(clickEvent -> subWindow.close());
+            confirm.addClickListener(clickEvent -> {
+                System.out.println("Do event");
+            });
+
+            decline.setStyleName(ValoTheme.BUTTON_PRIMARY);
+            confirm.setStyleName(ValoTheme.BUTTON_DANGER);
+            buttons.addComponents(decline, confirm);
+            content.addComponents(question, buttons);
+            panel.setContent(content);
+            subWindow.setResizable(false);
+            subWindow.setClosable(false);
+            subWindow.center();
+            subWindow.setModal(true);
+            subWindow.setContent(panel);
+            getUI().addWindow(subWindow);
+        };
+
         MenuBar menuBar = new MenuBar();
         menuBar.addItem("Add New User", newUser);
         menuBar.addItem("Edit Selected User", editUser);
         menuBar.addItem("Delete Selected User", deleteUser);
+        menuBar.addItem("PopUP", popUp);
 
 //        customerDao.close();
 //        FactoryManager.close();
